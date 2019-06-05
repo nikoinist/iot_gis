@@ -1,2 +1,366 @@
-# iot_gis
-using gis for iot sensor positioning
+
+Fire prevention systems using IoT
+-------------------------------------------------
+
+### Preface
+
+This problem starts with the education of populace.
+Prevention of forest fires is first and foremost a human problem, technology is augmentation to humans,
+which is a tool and nothing more.
+So, like all the problems the best start is to educate.
+Education campaign is bigger issue since most of the population is not familiar with how and why fires start
+and how they propagate.
+There are many campaigns that are proven and tried and are a great starting point(Smoky the bear).
+Simply put: educate then augment.
+
+This solution has to have 2 components. A sensing and alert part for professionals, and alert and information
+component for population.
+As such:
+* Using cheap off the shelf components for sensors.
+* System for coordinating and supervising the staff and monitoring the sensors(GIS) C&C.
+* Alert system that predicts possible fires and areas of fires.
+* Civilian alert and advisor system.
+
+### 1.Where to place the sensors?
+As always good starting point with any analytical question is to look at the available data.
+GIS is a natural choice as a starting point since a lot of the information is of geospatial nature.
+National forest organisation has a very good information about the national forests and woods.
+It is available to all interested parties and is wealth of information.
+Using geospatial algorithms and techniques we can quickly visualize and present some of the questions 
+that we are interested in.
+
+Using information aquired from national forest agency(HR Šume) in Croatia we can obtain the geospatial information about the location and clasification of national forests in country.
+This information contains the areas, designtation and fire hazard information for particular areas.
+We can visualize that information for better understanding of the data and further analysis.
+
+
+```python
+m
+```
+
+
+
+
+<div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><iframe src="data:text/html;charset=utf-8;base64,PCFET0NUWVBFIGh0bWw+CjxoZWFkPiAgICAKICAgIDxtZXRhIGh0dHAtZXF1aXY9ImNvbnRlbnQtdHlwZSIgY29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PVVURi04IiAvPgogICAgPHNjcmlwdD5MX1BSRUZFUl9DQU5WQVM9ZmFsc2U7IExfTk9fVE9VQ0g9ZmFsc2U7IExfRElTQUJMRV8zRD1mYWxzZTs8L3NjcmlwdD4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL2xlYWZsZXRAMS4zLjQvZGlzdC9sZWFmbGV0LmpzIj48L3NjcmlwdD4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2FqYXguZ29vZ2xlYXBpcy5jb20vYWpheC9saWJzL2pxdWVyeS8xLjExLjEvanF1ZXJ5Lm1pbi5qcyI+PC9zY3JpcHQ+CiAgICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9tYXhjZG4uYm9vdHN0cmFwY2RuLmNvbS9ib290c3RyYXAvMy4yLjAvanMvYm9vdHN0cmFwLm1pbi5qcyI+PC9zY3JpcHQ+CiAgICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9jZG5qcy5jbG91ZGZsYXJlLmNvbS9hamF4L2xpYnMvTGVhZmxldC5hd2Vzb21lLW1hcmtlcnMvMi4wLjIvbGVhZmxldC5hd2Vzb21lLW1hcmtlcnMuanMiPjwvc2NyaXB0PgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL2xlYWZsZXRAMS4zLjQvZGlzdC9sZWFmbGV0LmNzcyIvPgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL21heGNkbi5ib290c3RyYXBjZG4uY29tL2Jvb3RzdHJhcC8zLjIuMC9jc3MvYm9vdHN0cmFwLm1pbi5jc3MiLz4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgaHJlZj0iaHR0cHM6Ly9tYXhjZG4uYm9vdHN0cmFwY2RuLmNvbS9ib290c3RyYXAvMy4yLjAvY3NzL2Jvb3RzdHJhcC10aGVtZS5taW4uY3NzIi8+CiAgICA8bGluayByZWw9InN0eWxlc2hlZXQiIGhyZWY9Imh0dHBzOi8vbWF4Y2RuLmJvb3RzdHJhcGNkbi5jb20vZm9udC1hd2Vzb21lLzQuNi4zL2Nzcy9mb250LWF3ZXNvbWUubWluLmNzcyIvPgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL2NkbmpzLmNsb3VkZmxhcmUuY29tL2FqYXgvbGlicy9MZWFmbGV0LmF3ZXNvbWUtbWFya2Vycy8yLjAuMi9sZWFmbGV0LmF3ZXNvbWUtbWFya2Vycy5jc3MiLz4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgaHJlZj0iaHR0cHM6Ly9yYXdjZG4uZ2l0aGFjay5jb20vcHl0aG9uLXZpc3VhbGl6YXRpb24vZm9saXVtL21hc3Rlci9mb2xpdW0vdGVtcGxhdGVzL2xlYWZsZXQuYXdlc29tZS5yb3RhdGUuY3NzIi8+CiAgICA8c3R5bGU+aHRtbCwgYm9keSB7d2lkdGg6IDEwMCU7aGVpZ2h0OiAxMDAlO21hcmdpbjogMDtwYWRkaW5nOiAwO308L3N0eWxlPgogICAgPHN0eWxlPiNtYXAge3Bvc2l0aW9uOmFic29sdXRlO3RvcDowO2JvdHRvbTowO3JpZ2h0OjA7bGVmdDowO308L3N0eWxlPgogICAgCiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLAogICAgICAgIGluaXRpYWwtc2NhbGU9MS4wLCBtYXhpbXVtLXNjYWxlPTEuMCwgdXNlci1zY2FsYWJsZT1ubyIgLz4KICAgIDxzdHlsZT4jbWFwXzZkMTUzODc1NzlhMjQxY2FhYjQ4NjNlOTQyYTYxMGYyIHsKICAgICAgICBwb3NpdGlvbjogcmVsYXRpdmU7CiAgICAgICAgd2lkdGg6IDEwMC4wJTsKICAgICAgICBoZWlnaHQ6IDEwMC4wJTsKICAgICAgICBsZWZ0OiAwLjAlOwogICAgICAgIHRvcDogMC4wJTsKICAgICAgICB9CiAgICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PiAgICAKICAgIAogICAgICAgICAgICAgICAgPGRpdiBzdHlsZT0icG9zaXRpb246IGZpeGVkOyAKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJvdHRvbTogNTBweDsgbGVmdDogNTBweDsgd2lkdGg6IDEwMHB4OyBoZWlnaHQ6IDE1MHB4OyAKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJhY2tncm91bmQ6IHdoaXRlOwogICAgICAgICAgICAgICAgICAgICAgICAgICAgYm9yZGVyOjJweCBzb2xpZCBibGFjazsgei1pbmRleDo5OTk5OyBmb250LXNpemU6MTRweDsKICAgICAgICAgICAgICAgICAgICAgICAgICAgICI+Jm5ic3A7IEZpcmUgaGF6YXJkPGJyPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgJm5ic3A7IDxpbWcgc3JjPSJodHRwOi8vMTczLjgyLjk0LjEwNDo4MDgwL2dlb3NlcnZlci9JT1Qvd21zP1JFUVVFU1Q9R2V0TGVnZW5kR3JhcGhpYyZWRVJTSU9OPTEuMC4wJkZPUk1BVD1pbWFnZS9wbmcmV0lEVEg9MjAmSEVJR0hUPTIwJkxBWUVSPUlPVDpPcGFzbm9zdF9vZF9wb3phcmEiPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICAgICAgCiAgICAKICAgIDxkaXYgY2xhc3M9ImZvbGl1bS1tYXAiIGlkPSJtYXBfNmQxNTM4NzU3OWEyNDFjYWFiNDg2M2U5NDJhNjEwZjIiID48L2Rpdj4KPC9ib2R5Pgo8c2NyaXB0PiAgICAKICAgIAogICAgCiAgICAgICAgdmFyIGJvdW5kcyA9IG51bGw7CiAgICAKCiAgICB2YXIgbWFwXzZkMTUzODc1NzlhMjQxY2FhYjQ4NjNlOTQyYTYxMGYyID0gTC5tYXAoCiAgICAgICAgJ21hcF82ZDE1Mzg3NTc5YTI0MWNhYWI0ODYzZTk0MmE2MTBmMicsIHsKICAgICAgICBjZW50ZXI6IFs0NS4yMywgMThdLAogICAgICAgIHpvb206IDEzLAogICAgICAgIG1heEJvdW5kczogYm91bmRzLAogICAgICAgIGxheWVyczogW10sCiAgICAgICAgd29ybGRDb3B5SnVtcDogZmFsc2UsCiAgICAgICAgY3JzOiBMLkNSUy5FUFNHMzg1NywKICAgICAgICB6b29tQ29udHJvbDogdHJ1ZSwKICAgICAgICB9KTsKCiAgICAKICAgIAogICAgdmFyIHRpbGVfbGF5ZXJfYWYxMWJkNzhhMjNkNDA3YjhiNjg4YjgxZWE5MmMxOTIgPSBMLnRpbGVMYXllcigKICAgICAgICAnaHR0cHM6Ly97c30udGlsZS5vcGVuc3RyZWV0bWFwLm9yZy97en0ve3h9L3t5fS5wbmcnLAogICAgICAgIHsKICAgICAgICAiYXR0cmlidXRpb24iOiBudWxsLAogICAgICAgICJkZXRlY3RSZXRpbmEiOiBmYWxzZSwKICAgICAgICAibWF4TmF0aXZlWm9vbSI6IDE4LAogICAgICAgICJtYXhab29tIjogMTgsCiAgICAgICAgIm1pblpvb20iOiAwLAogICAgICAgICJub1dyYXAiOiBmYWxzZSwKICAgICAgICAib3BhY2l0eSI6IDEsCiAgICAgICAgInN1YmRvbWFpbnMiOiAiYWJjIiwKICAgICAgICAidG1zIjogZmFsc2UKfSkuYWRkVG8obWFwXzZkMTUzODc1NzlhMjQxY2FhYjQ4NjNlOTQyYTYxMGYyKTsKICAgIAogICAgICAgICAgICB2YXIgbWFjcm9fZWxlbWVudF85ODY3OWExYjY2ZmI0MjMzYjM0NTk3Y2ZlZmM1ODRhZSA9IEwudGlsZUxheWVyLndtcygKICAgICAgICAgICAgICAgICdodHRwOi8vMTczLjgyLjk0LjEwNDo4MDgwL2dlb3NlcnZlci9JT1Qvd21zPycsCiAgICAgICAgICAgICAgICB7CiAgImF0dHJpYnV0aW9uIjogIiIsCiAgImZvcm1hdCI6ICJpbWFnZS9wbmciLAogICJsYXllcnMiOiAiSU9UOk9wYXNub3N0X29kX3BvemFyYSIsCiAgInN0eWxlcyI6ICIiLAogICJ0cmFuc3BhcmVudCI6IHRydWUsCiAgInZlcnNpb24iOiAiMS4xLjEiCn0KICAgICAgICAgICAgICAgICkuYWRkVG8obWFwXzZkMTUzODc1NzlhMjQxY2FhYjQ4NjNlOTQyYTYxMGYyKTsKCiAgICAgICAgCiAgICAKICAgICAgICAgICAgdmFyIGxheWVyX2NvbnRyb2xfM2ZlZDQzOTFhZWM1NDQ1ZGIzN2Y4N2E5OTIzYTEyMmYgPSB7CiAgICAgICAgICAgICAgICBiYXNlX2xheWVycyA6IHsgIm9wZW5zdHJlZXRtYXAiIDogdGlsZV9sYXllcl9hZjExYmQ3OGEyM2Q0MDdiOGI2ODhiODFlYTkyYzE5MiwgfSwKICAgICAgICAgICAgICAgIG92ZXJsYXlzIDogeyAiRmlyZSBoYXphcmQiIDogbWFjcm9fZWxlbWVudF85ODY3OWExYjY2ZmI0MjMzYjM0NTk3Y2ZlZmM1ODRhZSwgfQogICAgICAgICAgICAgICAgfTsKICAgICAgICAgICAgTC5jb250cm9sLmxheWVycygKICAgICAgICAgICAgICAgIGxheWVyX2NvbnRyb2xfM2ZlZDQzOTFhZWM1NDQ1ZGIzN2Y4N2E5OTIzYTEyMmYuYmFzZV9sYXllcnMsCiAgICAgICAgICAgICAgICBsYXllcl9jb250cm9sXzNmZWQ0MzkxYWVjNTQ0NWRiMzdmODdhOTkyM2ExMjJmLm92ZXJsYXlzLAogICAgICAgICAgICAgICAge3Bvc2l0aW9uOiAnYm90dG9tcmlnaHQnLAogICAgICAgICAgICAgICAgIGNvbGxhcHNlZDogZmFsc2UsCiAgICAgICAgICAgICAgICAgYXV0b1pJbmRleDogdHJ1ZQogICAgICAgICAgICAgICAgfSkuYWRkVG8obWFwXzZkMTUzODc1NzlhMjQxY2FhYjQ4NjNlOTQyYTYxMGYyKTsKICAgICAgICAgICAgCiAgICAgICAgCjwvc2NyaXB0Pg==" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe></div></div>
+
+
+
+We are using a small sample data for a particular area in a "Brodsko-posavska" county, specifically the Podcrkavlje region.
+As we can see the varition in the hazard areas is diverse and somewhat clustered in different areas. Since the areas are classified and have a designation this could be a basis for our own simple naming convention and help with the firefighting and locating the problematic areas.
+
+Using the information in this dataset fir fire hazard information, we can use the geospatial algorithms to create list of points that could be potential locations for our sensors. The algorithm takes in the account the hazard level of the area, minimum distances between the points and the size of the area that contains the points. The number of points vary as the fire hazard level is higher.
+
+
+```python
+m1
+```
+
+
+
+
+<div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><iframe src="data:text/html;charset=utf-8;base64,PCFET0NUWVBFIGh0bWw+CjxoZWFkPiAgICAKICAgIDxtZXRhIGh0dHAtZXF1aXY9ImNvbnRlbnQtdHlwZSIgY29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PVVURi04IiAvPgogICAgPHNjcmlwdD5MX1BSRUZFUl9DQU5WQVM9ZmFsc2U7IExfTk9fVE9VQ0g9ZmFsc2U7IExfRElTQUJMRV8zRD1mYWxzZTs8L3NjcmlwdD4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL2xlYWZsZXRAMS4zLjQvZGlzdC9sZWFmbGV0LmpzIj48L3NjcmlwdD4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2FqYXguZ29vZ2xlYXBpcy5jb20vYWpheC9saWJzL2pxdWVyeS8xLjExLjEvanF1ZXJ5Lm1pbi5qcyI+PC9zY3JpcHQ+CiAgICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9tYXhjZG4uYm9vdHN0cmFwY2RuLmNvbS9ib290c3RyYXAvMy4yLjAvanMvYm9vdHN0cmFwLm1pbi5qcyI+PC9zY3JpcHQ+CiAgICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9jZG5qcy5jbG91ZGZsYXJlLmNvbS9hamF4L2xpYnMvTGVhZmxldC5hd2Vzb21lLW1hcmtlcnMvMi4wLjIvbGVhZmxldC5hd2Vzb21lLW1hcmtlcnMuanMiPjwvc2NyaXB0PgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL2xlYWZsZXRAMS4zLjQvZGlzdC9sZWFmbGV0LmNzcyIvPgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL21heGNkbi5ib290c3RyYXBjZG4uY29tL2Jvb3RzdHJhcC8zLjIuMC9jc3MvYm9vdHN0cmFwLm1pbi5jc3MiLz4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgaHJlZj0iaHR0cHM6Ly9tYXhjZG4uYm9vdHN0cmFwY2RuLmNvbS9ib290c3RyYXAvMy4yLjAvY3NzL2Jvb3RzdHJhcC10aGVtZS5taW4uY3NzIi8+CiAgICA8bGluayByZWw9InN0eWxlc2hlZXQiIGhyZWY9Imh0dHBzOi8vbWF4Y2RuLmJvb3RzdHJhcGNkbi5jb20vZm9udC1hd2Vzb21lLzQuNi4zL2Nzcy9mb250LWF3ZXNvbWUubWluLmNzcyIvPgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL2NkbmpzLmNsb3VkZmxhcmUuY29tL2FqYXgvbGlicy9MZWFmbGV0LmF3ZXNvbWUtbWFya2Vycy8yLjAuMi9sZWFmbGV0LmF3ZXNvbWUtbWFya2Vycy5jc3MiLz4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgaHJlZj0iaHR0cHM6Ly9yYXdjZG4uZ2l0aGFjay5jb20vcHl0aG9uLXZpc3VhbGl6YXRpb24vZm9saXVtL21hc3Rlci9mb2xpdW0vdGVtcGxhdGVzL2xlYWZsZXQuYXdlc29tZS5yb3RhdGUuY3NzIi8+CiAgICA8c3R5bGU+aHRtbCwgYm9keSB7d2lkdGg6IDEwMCU7aGVpZ2h0OiAxMDAlO21hcmdpbjogMDtwYWRkaW5nOiAwO308L3N0eWxlPgogICAgPHN0eWxlPiNtYXAge3Bvc2l0aW9uOmFic29sdXRlO3RvcDowO2JvdHRvbTowO3JpZ2h0OjA7bGVmdDowO308L3N0eWxlPgogICAgCiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLAogICAgICAgIGluaXRpYWwtc2NhbGU9MS4wLCBtYXhpbXVtLXNjYWxlPTEuMCwgdXNlci1zY2FsYWJsZT1ubyIgLz4KICAgIDxzdHlsZT4jbWFwX2YyODdlY2I2YjZlNzQ0MDM5NTIyYmM2NTQyOGIzNTYxIHsKICAgICAgICBwb3NpdGlvbjogcmVsYXRpdmU7CiAgICAgICAgd2lkdGg6IDEwMC4wJTsKICAgICAgICBoZWlnaHQ6IDEwMC4wJTsKICAgICAgICBsZWZ0OiAwLjAlOwogICAgICAgIHRvcDogMC4wJTsKICAgICAgICB9CiAgICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PiAgICAKICAgIAogICAgICAgICAgICAgICAgPGRpdiBzdHlsZT0icG9zaXRpb246IGZpeGVkOyAKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJvdHRvbTogNTBweDsgbGVmdDogNTBweDsgd2lkdGg6IDE1MHB4OyBoZWlnaHQ6IDUwcHg7IAogICAgICAgICAgICAgICAgICAgICAgICAgICAgYmFja2dyb3VuZDogd2hpdGU7CiAgICAgICAgICAgICAgICAgICAgICAgICAgICBib3JkZXI6MnB4IHNvbGlkIGJsYWNrOyB6LWluZGV4Ojk5OTk7IGZvbnQtc2l6ZToxNHB4OwogICAgICAgICAgICAgICAgICAgICAgICAgICAgIj4mbmJzcDsgU2Vuc29yIGxvY2F0aW9ucyA8YnI+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJm5ic3A7ICZuYnNwO1NlbnNvcnMgPGkgY2xhc3M9ImZhIGZhLWNpcmNsZSIgc3R5bGU9ImNvbG9yOmJsYWNrIj48L2k+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgICAgICAKICAgIAogICAgPGRpdiBjbGFzcz0iZm9saXVtLW1hcCIgaWQ9Im1hcF9mMjg3ZWNiNmI2ZTc0NDAzOTUyMmJjNjU0MjhiMzU2MSIgPjwvZGl2Pgo8L2JvZHk+CjxzY3JpcHQ+ICAgIAogICAgCiAgICAKICAgICAgICB2YXIgYm91bmRzID0gbnVsbDsKICAgIAoKICAgIHZhciBtYXBfZjI4N2VjYjZiNmU3NDQwMzk1MjJiYzY1NDI4YjM1NjEgPSBMLm1hcCgKICAgICAgICAnbWFwX2YyODdlY2I2YjZlNzQ0MDM5NTIyYmM2NTQyOGIzNTYxJywgewogICAgICAgIGNlbnRlcjogWzQ1LjIzLCAxOF0sCiAgICAgICAgem9vbTogMTMsCiAgICAgICAgbWF4Qm91bmRzOiBib3VuZHMsCiAgICAgICAgbGF5ZXJzOiBbXSwKICAgICAgICB3b3JsZENvcHlKdW1wOiBmYWxzZSwKICAgICAgICBjcnM6IEwuQ1JTLkVQU0czODU3LAogICAgICAgIHpvb21Db250cm9sOiB0cnVlLAogICAgICAgIH0pOwoKICAgIAogICAgCiAgICB2YXIgdGlsZV9sYXllcl9jZmM4NWQ0ODk3YmI0MzNkOWVjNGE0MjU3YzgwZTM3YiA9IEwudGlsZUxheWVyKAogICAgICAgICdodHRwczovL3tzfS50aWxlLm9wZW5zdHJlZXRtYXAub3JnL3t6fS97eH0ve3l9LnBuZycsCiAgICAgICAgewogICAgICAgICJhdHRyaWJ1dGlvbiI6IG51bGwsCiAgICAgICAgImRldGVjdFJldGluYSI6IGZhbHNlLAogICAgICAgICJtYXhOYXRpdmVab29tIjogMTgsCiAgICAgICAgIm1heFpvb20iOiAxOCwKICAgICAgICAibWluWm9vbSI6IDAsCiAgICAgICAgIm5vV3JhcCI6IGZhbHNlLAogICAgICAgICJvcGFjaXR5IjogMSwKICAgICAgICAic3ViZG9tYWlucyI6ICJhYmMiLAogICAgICAgICJ0bXMiOiBmYWxzZQp9KS5hZGRUbyhtYXBfZjI4N2VjYjZiNmU3NDQwMzk1MjJiYzY1NDI4YjM1NjEpOwogICAgCiAgICAgICAgICAgIHZhciBtYWNyb19lbGVtZW50X2QwYjk5ODE2ZDBmNTRhNTc5ZGI2ZDc0NjZhMGEzMzkyID0gTC50aWxlTGF5ZXIud21zKAogICAgICAgICAgICAgICAgJ2h0dHA6Ly8xNzMuODIuOTQuMTA0OjgwODAvZ2Vvc2VydmVyL0lPVC93bXM/JywKICAgICAgICAgICAgICAgIHsKICAiYXR0cmlidXRpb24iOiAiIiwKICAiZm9ybWF0IjogImltYWdlL3BuZyIsCiAgImxheWVycyI6ICJJT1Q6T3Bhc25vc3Rfb2RfcG96YXJhIiwKICAic3R5bGVzIjogIiIsCiAgInRyYW5zcGFyZW50IjogdHJ1ZSwKICAidmVyc2lvbiI6ICIxLjEuMSIKfQogICAgICAgICAgICAgICAgKS5hZGRUbyhtYXBfZjI4N2VjYjZiNmU3NDQwMzk1MjJiYzY1NDI4YjM1NjEpOwoKICAgICAgICAKICAgIAogICAgICAgICAgICB2YXIgbWFjcm9fZWxlbWVudF9jNDRhZGNkODYxYjU0M2QyYmQ0YmZmZGQxYTc1NGU3NiA9IEwudGlsZUxheWVyLndtcygKICAgICAgICAgICAgICAgICdodHRwOi8vMTczLjgyLjk0LjEwNDo4MDgwL2dlb3NlcnZlci9JT1Qvd21zPycsCiAgICAgICAgICAgICAgICB7CiAgImF0dHJpYnV0aW9uIjogIiIsCiAgImZvcm1hdCI6ICJpbWFnZS9wbmciLAogICJsYXllcnMiOiAiSU9UOlNlbnNvcmkiLAogICJzdHlsZXMiOiAiIiwKICAidHJhbnNwYXJlbnQiOiB0cnVlLAogICJ2ZXJzaW9uIjogIjEuMS4xIgp9CiAgICAgICAgICAgICAgICApLmFkZFRvKG1hcF9mMjg3ZWNiNmI2ZTc0NDAzOTUyMmJjNjU0MjhiMzU2MSk7CgogICAgICAgIAogICAgCiAgICAgICAgICAgIHZhciBsYXllcl9jb250cm9sXzU1YzU0OGUwYWE0ZDQyOWZhYjc1ODI4YTVlMjU0MzJiID0gewogICAgICAgICAgICAgICAgYmFzZV9sYXllcnMgOiB7ICJvcGVuc3RyZWV0bWFwIiA6IHRpbGVfbGF5ZXJfY2ZjODVkNDg5N2JiNDMzZDllYzRhNDI1N2M4MGUzN2IsIH0sCiAgICAgICAgICAgICAgICBvdmVybGF5cyA6IHsgIkZpcmUgaGF6YXJkIiA6IG1hY3JvX2VsZW1lbnRfZDBiOTk4MTZkMGY1NGE1NzlkYjZkNzQ2NmEwYTMzOTIsIlNlbnNvciBsb2NhdGlvbiIgOiBtYWNyb19lbGVtZW50X2M0NGFkY2Q4NjFiNTQzZDJiZDRiZmZkZDFhNzU0ZTc2LCB9CiAgICAgICAgICAgICAgICB9OwogICAgICAgICAgICBMLmNvbnRyb2wubGF5ZXJzKAogICAgICAgICAgICAgICAgbGF5ZXJfY29udHJvbF81NWM1NDhlMGFhNGQ0MjlmYWI3NTgyOGE1ZTI1NDMyYi5iYXNlX2xheWVycywKICAgICAgICAgICAgICAgIGxheWVyX2NvbnRyb2xfNTVjNTQ4ZTBhYTRkNDI5ZmFiNzU4MjhhNWUyNTQzMmIub3ZlcmxheXMsCiAgICAgICAgICAgICAgICB7cG9zaXRpb246ICdib3R0b21yaWdodCcsCiAgICAgICAgICAgICAgICAgY29sbGFwc2VkOiBmYWxzZSwKICAgICAgICAgICAgICAgICBhdXRvWkluZGV4OiB0cnVlCiAgICAgICAgICAgICAgICB9KS5hZGRUbyhtYXBfZjI4N2VjYjZiNmU3NDQwMzk1MjJiYzY1NDI4YjM1NjEpOwogICAgICAgICAgICAKICAgICAgICAKPC9zY3JpcHQ+" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe></div></div>
+
+
+
+We then used the k-means clustering algorithm to cluster the points in a groups that are more managable and equally distant from each other. That provides better grouping for LoRaWAN nodes so we can position them in areas that are closest and find a optimal location for the WAN nodes that will be a relay for our sensors.
+
+Since this is a small area that we chose as a sample, we can see the algorithm generated substantial number of possible location for sensor nodes(383 points), and are randomly generated based on the input paramaters.
+
+This is a expensive and very hard to justify as a possible solution with this set of information that we used so far, but a great starting point for further data layers that we add.
+
+
+
+And, so we continue our gathering of information for a more clear picture. We obtained the weather information from:
+>European Centre for Medium-Range Weather Forecasts, https://www.ecmwf.int/en/forecasts/datasets
+
+Speciffically a monthly means information for wind direction for our sample location, and incorporated it in our little geospatial analysis.
+
+
+```python
+m2
+```
+
+
+
+
+<div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><iframe src="data:text/html;charset=utf-8;base64,PCFET0NUWVBFIGh0bWw+CjxoZWFkPiAgICAKICAgIDxtZXRhIGh0dHAtZXF1aXY9ImNvbnRlbnQtdHlwZSIgY29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PVVURi04IiAvPgogICAgPHNjcmlwdD5MX1BSRUZFUl9DQU5WQVM9ZmFsc2U7IExfTk9fVE9VQ0g9ZmFsc2U7IExfRElTQUJMRV8zRD1mYWxzZTs8L3NjcmlwdD4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL2xlYWZsZXRAMS4zLjQvZGlzdC9sZWFmbGV0LmpzIj48L3NjcmlwdD4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2FqYXguZ29vZ2xlYXBpcy5jb20vYWpheC9saWJzL2pxdWVyeS8xLjExLjEvanF1ZXJ5Lm1pbi5qcyI+PC9zY3JpcHQ+CiAgICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9tYXhjZG4uYm9vdHN0cmFwY2RuLmNvbS9ib290c3RyYXAvMy4yLjAvanMvYm9vdHN0cmFwLm1pbi5qcyI+PC9zY3JpcHQ+CiAgICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9jZG5qcy5jbG91ZGZsYXJlLmNvbS9hamF4L2xpYnMvTGVhZmxldC5hd2Vzb21lLW1hcmtlcnMvMi4wLjIvbGVhZmxldC5hd2Vzb21lLW1hcmtlcnMuanMiPjwvc2NyaXB0PgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL2xlYWZsZXRAMS4zLjQvZGlzdC9sZWFmbGV0LmNzcyIvPgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL21heGNkbi5ib290c3RyYXBjZG4uY29tL2Jvb3RzdHJhcC8zLjIuMC9jc3MvYm9vdHN0cmFwLm1pbi5jc3MiLz4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgaHJlZj0iaHR0cHM6Ly9tYXhjZG4uYm9vdHN0cmFwY2RuLmNvbS9ib290c3RyYXAvMy4yLjAvY3NzL2Jvb3RzdHJhcC10aGVtZS5taW4uY3NzIi8+CiAgICA8bGluayByZWw9InN0eWxlc2hlZXQiIGhyZWY9Imh0dHBzOi8vbWF4Y2RuLmJvb3RzdHJhcGNkbi5jb20vZm9udC1hd2Vzb21lLzQuNi4zL2Nzcy9mb250LWF3ZXNvbWUubWluLmNzcyIvPgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL2NkbmpzLmNsb3VkZmxhcmUuY29tL2FqYXgvbGlicy9MZWFmbGV0LmF3ZXNvbWUtbWFya2Vycy8yLjAuMi9sZWFmbGV0LmF3ZXNvbWUtbWFya2Vycy5jc3MiLz4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgaHJlZj0iaHR0cHM6Ly9yYXdjZG4uZ2l0aGFjay5jb20vcHl0aG9uLXZpc3VhbGl6YXRpb24vZm9saXVtL21hc3Rlci9mb2xpdW0vdGVtcGxhdGVzL2xlYWZsZXQuYXdlc29tZS5yb3RhdGUuY3NzIi8+CiAgICA8c3R5bGU+aHRtbCwgYm9keSB7d2lkdGg6IDEwMCU7aGVpZ2h0OiAxMDAlO21hcmdpbjogMDtwYWRkaW5nOiAwO308L3N0eWxlPgogICAgPHN0eWxlPiNtYXAge3Bvc2l0aW9uOmFic29sdXRlO3RvcDowO2JvdHRvbTowO3JpZ2h0OjA7bGVmdDowO308L3N0eWxlPgogICAgCiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLAogICAgICAgIGluaXRpYWwtc2NhbGU9MS4wLCBtYXhpbXVtLXNjYWxlPTEuMCwgdXNlci1zY2FsYWJsZT1ubyIgLz4KICAgIDxzdHlsZT4jbWFwXzM4ODQwZDU0YjA3MzQyYzhhOTNlNDk5NWNhODBlODRhIHsKICAgICAgICBwb3NpdGlvbjogcmVsYXRpdmU7CiAgICAgICAgd2lkdGg6IDEwMC4wJTsKICAgICAgICBoZWlnaHQ6IDEwMC4wJTsKICAgICAgICBsZWZ0OiAwLjAlOwogICAgICAgIHRvcDogMC4wJTsKICAgICAgICB9CiAgICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PiAgICAKICAgIAogICAgICAgICAgICAgICAgPGRpdiBzdHlsZT0icG9zaXRpb246IGZpeGVkOyAKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJvdHRvbTogNTBweDsgbGVmdDogNTBweDsgd2lkdGg6IDEzMHB4OyBoZWlnaHQ6IDY1cHg7IAogICAgICAgICAgICAgICAgICAgICAgICAgICAgYmFja2dyb3VuZDogd2hpdGU7CiAgICAgICAgICAgICAgICAgICAgICAgICAgICBib3JkZXI6MnB4IHNvbGlkIGJsYWNrOyB6LWluZGV4Ojk5OTk7IGZvbnQtc2l6ZToxNHB4OwogICAgICAgICAgICAgICAgICAgICAgICAgICAgIj4mbmJzcDsgV2luZCBkaXJlY3Rpb24gPGJyPgogICAgICAgICAgICAgICAgICAgICAgICAgICAgJm5ic3A7Jm5ic3A7PGltZyBzcmM9Imh0dHA6Ly8xNzMuODIuOTQuMTA0OjgwODAvZ2Vvc2VydmVyL0lPVC93bXM/UkVRVUVTVD1HZXRMZWdlbmRHcmFwaGljJlZFUlNJT049MS4wLjAmRk9STUFUPWltYWdlL3BuZyZXSURUSD02MCZIRUlHSFQ9NDAmTEFZRVI9SU9UOnZqZXRhcl9rb2xvdm96Ij4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgICAgIAogICAgCiAgICA8ZGl2IGNsYXNzPSJmb2xpdW0tbWFwIiBpZD0ibWFwXzM4ODQwZDU0YjA3MzQyYzhhOTNlNDk5NWNhODBlODRhIiA+PC9kaXY+CjwvYm9keT4KPHNjcmlwdD4gICAgCiAgICAKICAgIAogICAgICAgIHZhciBib3VuZHMgPSBudWxsOwogICAgCgogICAgdmFyIG1hcF8zODg0MGQ1NGIwNzM0MmM4YTkzZTQ5OTVjYTgwZTg0YSA9IEwubWFwKAogICAgICAgICdtYXBfMzg4NDBkNTRiMDczNDJjOGE5M2U0OTk1Y2E4MGU4NGEnLCB7CiAgICAgICAgY2VudGVyOiBbNDUuMjMsIDE4XSwKICAgICAgICB6b29tOiAxMywKICAgICAgICBtYXhCb3VuZHM6IGJvdW5kcywKICAgICAgICBsYXllcnM6IFtdLAogICAgICAgIHdvcmxkQ29weUp1bXA6IGZhbHNlLAogICAgICAgIGNyczogTC5DUlMuRVBTRzM4NTcsCiAgICAgICAgem9vbUNvbnRyb2w6IHRydWUsCiAgICAgICAgfSk7CgogICAgCiAgICAKICAgIHZhciB0aWxlX2xheWVyX2M0YTVhZDVhNTA3NzQzMWViNDE0YTExZjllY2EzODZhID0gTC50aWxlTGF5ZXIoCiAgICAgICAgJ2h0dHBzOi8ve3N9LnRpbGUub3BlbnN0cmVldG1hcC5vcmcve3p9L3t4fS97eX0ucG5nJywKICAgICAgICB7CiAgICAgICAgImF0dHJpYnV0aW9uIjogbnVsbCwKICAgICAgICAiZGV0ZWN0UmV0aW5hIjogZmFsc2UsCiAgICAgICAgIm1heE5hdGl2ZVpvb20iOiAxOCwKICAgICAgICAibWF4Wm9vbSI6IDE4LAogICAgICAgICJtaW5ab29tIjogMCwKICAgICAgICAibm9XcmFwIjogZmFsc2UsCiAgICAgICAgIm9wYWNpdHkiOiAxLAogICAgICAgICJzdWJkb21haW5zIjogImFiYyIsCiAgICAgICAgInRtcyI6IGZhbHNlCn0pLmFkZFRvKG1hcF8zODg0MGQ1NGIwNzM0MmM4YTkzZTQ5OTVjYTgwZTg0YSk7CiAgICAKICAgICAgICAgICAgdmFyIG1hY3JvX2VsZW1lbnRfZDZiMTI0MjE2ZWFmNDI1YWI2MmRmNzg0OTcyZGUxOTkgPSBMLnRpbGVMYXllci53bXMoCiAgICAgICAgICAgICAgICAnaHR0cDovLzE3My44Mi45NC4xMDQ6ODA4MC9nZW9zZXJ2ZXIvSU9UL3dtcz8nLAogICAgICAgICAgICAgICAgewogICJhdHRyaWJ1dGlvbiI6ICIiLAogICJmb3JtYXQiOiAiaW1hZ2UvcG5nIiwKICAibGF5ZXJzIjogIklPVDpPcGFzbm9zdF9vZF9wb3phcmEiLAogICJzdHlsZXMiOiAiIiwKICAidHJhbnNwYXJlbnQiOiB0cnVlLAogICJ2ZXJzaW9uIjogIjEuMS4xIgp9CiAgICAgICAgICAgICAgICApLmFkZFRvKG1hcF8zODg0MGQ1NGIwNzM0MmM4YTkzZTQ5OTVjYTgwZTg0YSk7CgogICAgICAgIAogICAgCiAgICAgICAgICAgIHZhciBtYWNyb19lbGVtZW50XzdlZjA0ZmJhYzQzMzQ5ZjNiODVlN2EwNjdkMTkyNTFjID0gTC50aWxlTGF5ZXIud21zKAogICAgICAgICAgICAgICAgJ2h0dHA6Ly8xNzMuODIuOTQuMTA0OjgwODAvZ2Vvc2VydmVyL0lPVC93bXM/JywKICAgICAgICAgICAgICAgIHsKICAiYXR0cmlidXRpb24iOiAiIiwKICAiZm9ybWF0IjogImltYWdlL3BuZyIsCiAgImxheWVycyI6ICJJT1Q6dmpldGFyX2xpcGFuaiIsCiAgInN0eWxlcyI6ICIiLAogICJ0cmFuc3BhcmVudCI6IHRydWUsCiAgInZlcnNpb24iOiAiMS4xLjEiCn0KICAgICAgICAgICAgICAgICkuYWRkVG8obWFwXzM4ODQwZDU0YjA3MzQyYzhhOTNlNDk5NWNhODBlODRhKTsKCiAgICAgICAgCiAgICAKICAgICAgICAgICAgdmFyIG1hY3JvX2VsZW1lbnRfYjE0ZjNhNmU5NWMzNGFmNGJiYjNkMDAzMWQyZTM5NWQgPSBMLnRpbGVMYXllci53bXMoCiAgICAgICAgICAgICAgICAnaHR0cDovLzE3My44Mi45NC4xMDQ6ODA4MC9nZW9zZXJ2ZXIvSU9UL3dtcz8nLAogICAgICAgICAgICAgICAgewogICJhdHRyaWJ1dGlvbiI6ICIiLAogICJmb3JtYXQiOiAiaW1hZ2UvcG5nIiwKICAibGF5ZXJzIjogIklPVDp2amV0YXJfc3JwYW5qIiwKICAic3R5bGVzIjogIiIsCiAgInRyYW5zcGFyZW50IjogdHJ1ZSwKICAidmVyc2lvbiI6ICIxLjEuMSIKfQogICAgICAgICAgICAgICAgKS5hZGRUbyhtYXBfMzg4NDBkNTRiMDczNDJjOGE5M2U0OTk1Y2E4MGU4NGEpOwoKICAgICAgICAKICAgIAogICAgICAgICAgICB2YXIgbWFjcm9fZWxlbWVudF84ZjU0N2ZhZDEyMTc0MjE4YjIxODU3ZTA3NDczMTRiZCA9IEwudGlsZUxheWVyLndtcygKICAgICAgICAgICAgICAgICdodHRwOi8vMTczLjgyLjk0LjEwNDo4MDgwL2dlb3NlcnZlci9JT1Qvd21zPycsCiAgICAgICAgICAgICAgICB7CiAgImF0dHJpYnV0aW9uIjogIiIsCiAgImZvcm1hdCI6ICJpbWFnZS9wbmciLAogICJsYXllcnMiOiAiSU9UOnZqZXRhcl9rb2xvdm96IiwKICAic3R5bGVzIjogIiIsCiAgInRyYW5zcGFyZW50IjogdHJ1ZSwKICAidmVyc2lvbiI6ICIxLjEuMSIKfQogICAgICAgICAgICAgICAgKS5hZGRUbyhtYXBfMzg4NDBkNTRiMDczNDJjOGE5M2U0OTk1Y2E4MGU4NGEpOwoKICAgICAgICAKICAgIAogICAgICAgICAgICB2YXIgbGF5ZXJfY29udHJvbF84NWZmMTY4OTIyMmU0ZTY3YjNjODAwMmIzMDE1YmE2MyA9IHsKICAgICAgICAgICAgICAgIGJhc2VfbGF5ZXJzIDogeyAib3BlbnN0cmVldG1hcCIgOiB0aWxlX2xheWVyX2M0YTVhZDVhNTA3NzQzMWViNDE0YTExZjllY2EzODZhLCB9LAogICAgICAgICAgICAgICAgb3ZlcmxheXMgOiB7ICJGaXJlIGRhbmdlciIgOiBtYWNyb19lbGVtZW50X2Q2YjEyNDIxNmVhZjQyNWFiNjJkZjc4NDk3MmRlMTk5LCJXaW5kIGRpcmVjdGlvbiBKdW5lLzIwMTQiIDogbWFjcm9fZWxlbWVudF83ZWYwNGZiYWM0MzM0OWYzYjg1ZTdhMDY3ZDE5MjUxYywiV2luZCBkaXJlY3Rpb24gSnVseS8yMDE0IiA6IG1hY3JvX2VsZW1lbnRfYjE0ZjNhNmU5NWMzNGFmNGJiYjNkMDAzMWQyZTM5NWQsIldpbmQgZGlyZWN0aW9uIEF1Z3VzdC8yMDE0IiA6IG1hY3JvX2VsZW1lbnRfOGY1NDdmYWQxMjE3NDIxOGIyMTg1N2UwNzQ3MzE0YmQsIH0KICAgICAgICAgICAgICAgIH07CiAgICAgICAgICAgIEwuY29udHJvbC5sYXllcnMoCiAgICAgICAgICAgICAgICBsYXllcl9jb250cm9sXzg1ZmYxNjg5MjIyZTRlNjdiM2M4MDAyYjMwMTViYTYzLmJhc2VfbGF5ZXJzLAogICAgICAgICAgICAgICAgbGF5ZXJfY29udHJvbF84NWZmMTY4OTIyMmU0ZTY3YjNjODAwMmIzMDE1YmE2My5vdmVybGF5cywKICAgICAgICAgICAgICAgIHtwb3NpdGlvbjogJ2JvdHRvbXJpZ2h0JywKICAgICAgICAgICAgICAgICBjb2xsYXBzZWQ6IGZhbHNlLAogICAgICAgICAgICAgICAgIGF1dG9aSW5kZXg6IHRydWUKICAgICAgICAgICAgICAgIH0pLmFkZFRvKG1hcF8zODg0MGQ1NGIwNzM0MmM4YTkzZTQ5OTVjYTgwZTg0YSk7CiAgICAgICAgICAgIAogICAgICAgIAo8L3NjcmlwdD4=" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe></div></div>
+
+
+
+We chose the information for 3 month period at the height of fire season, this data can provide us with optimal placement of particle gathering (2.5pp or similar) and CO2 and similar sensors. From this information we can optimize and or build triangulation data for the placement and direction of gathering sensors that will provide best possible starting point for sensing.
+
+
+```python
+m3
+```
+
+
+
+
+<div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><iframe src="data:text/html;charset=utf-8;base64,PCFET0NUWVBFIGh0bWw+CjxoZWFkPiAgICAKICAgIDxtZXRhIGh0dHAtZXF1aXY9ImNvbnRlbnQtdHlwZSIgY29udGVudD0idGV4dC9odG1sOyBjaGFyc2V0PVVURi04IiAvPgogICAgPHNjcmlwdD5MX1BSRUZFUl9DQU5WQVM9ZmFsc2U7IExfTk9fVE9VQ0g9ZmFsc2U7IExfRElTQUJMRV8zRD1mYWxzZTs8L3NjcmlwdD4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL2xlYWZsZXRAMS4zLjQvZGlzdC9sZWFmbGV0LmpzIj48L3NjcmlwdD4KICAgIDxzY3JpcHQgc3JjPSJodHRwczovL2FqYXguZ29vZ2xlYXBpcy5jb20vYWpheC9saWJzL2pxdWVyeS8xLjExLjEvanF1ZXJ5Lm1pbi5qcyI+PC9zY3JpcHQ+CiAgICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9tYXhjZG4uYm9vdHN0cmFwY2RuLmNvbS9ib290c3RyYXAvMy4yLjAvanMvYm9vdHN0cmFwLm1pbi5qcyI+PC9zY3JpcHQ+CiAgICA8c2NyaXB0IHNyYz0iaHR0cHM6Ly9jZG5qcy5jbG91ZGZsYXJlLmNvbS9hamF4L2xpYnMvTGVhZmxldC5hd2Vzb21lLW1hcmtlcnMvMi4wLjIvbGVhZmxldC5hd2Vzb21lLW1hcmtlcnMuanMiPjwvc2NyaXB0PgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL2Nkbi5qc2RlbGl2ci5uZXQvbnBtL2xlYWZsZXRAMS4zLjQvZGlzdC9sZWFmbGV0LmNzcyIvPgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL21heGNkbi5ib290c3RyYXBjZG4uY29tL2Jvb3RzdHJhcC8zLjIuMC9jc3MvYm9vdHN0cmFwLm1pbi5jc3MiLz4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgaHJlZj0iaHR0cHM6Ly9tYXhjZG4uYm9vdHN0cmFwY2RuLmNvbS9ib290c3RyYXAvMy4yLjAvY3NzL2Jvb3RzdHJhcC10aGVtZS5taW4uY3NzIi8+CiAgICA8bGluayByZWw9InN0eWxlc2hlZXQiIGhyZWY9Imh0dHBzOi8vbWF4Y2RuLmJvb3RzdHJhcGNkbi5jb20vZm9udC1hd2Vzb21lLzQuNi4zL2Nzcy9mb250LWF3ZXNvbWUubWluLmNzcyIvPgogICAgPGxpbmsgcmVsPSJzdHlsZXNoZWV0IiBocmVmPSJodHRwczovL2NkbmpzLmNsb3VkZmxhcmUuY29tL2FqYXgvbGlicy9MZWFmbGV0LmF3ZXNvbWUtbWFya2Vycy8yLjAuMi9sZWFmbGV0LmF3ZXNvbWUtbWFya2Vycy5jc3MiLz4KICAgIDxsaW5rIHJlbD0ic3R5bGVzaGVldCIgaHJlZj0iaHR0cHM6Ly9yYXdjZG4uZ2l0aGFjay5jb20vcHl0aG9uLXZpc3VhbGl6YXRpb24vZm9saXVtL21hc3Rlci9mb2xpdW0vdGVtcGxhdGVzL2xlYWZsZXQuYXdlc29tZS5yb3RhdGUuY3NzIi8+CiAgICA8c3R5bGU+aHRtbCwgYm9keSB7d2lkdGg6IDEwMCU7aGVpZ2h0OiAxMDAlO21hcmdpbjogMDtwYWRkaW5nOiAwO308L3N0eWxlPgogICAgPHN0eWxlPiNtYXAge3Bvc2l0aW9uOmFic29sdXRlO3RvcDowO2JvdHRvbTowO3JpZ2h0OjA7bGVmdDowO308L3N0eWxlPgogICAgCiAgICA8bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLAogICAgICAgIGluaXRpYWwtc2NhbGU9MS4wLCBtYXhpbXVtLXNjYWxlPTEuMCwgdXNlci1zY2FsYWJsZT1ubyIgLz4KICAgIDxzdHlsZT4jbWFwXzdhZWVlNGFlMjFjNTQxYTU4MGE5NTk0NmZhNmI0ZWU4IHsKICAgICAgICBwb3NpdGlvbjogcmVsYXRpdmU7CiAgICAgICAgd2lkdGg6IDEwMC4wJTsKICAgICAgICBoZWlnaHQ6IDEwMC4wJTsKICAgICAgICBsZWZ0OiAwLjAlOwogICAgICAgIHRvcDogMC4wJTsKICAgICAgICB9CiAgICA8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PiAgICAKICAgIAogICAgICAgICAgICAgICAgPGRpdiBzdHlsZT0icG9zaXRpb246IGZpeGVkOyAKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGJvdHRvbTogNTBweDsgbGVmdDogNTBweDsgd2lkdGg6IDE1MHB4OyBoZWlnaHQ6IDU1cHg7IAogICAgICAgICAgICAgICAgICAgICAgICAgICAgYmFja2dyb3VuZDogd2hpdGU7CiAgICAgICAgICAgICAgICAgICAgICAgICAgICBib3JkZXI6MnB4IHNvbGlkIGJsYWNrOyB6LWluZGV4Ojk5OTk7IGZvbnQtc2l6ZToxNHB4OwogICAgICAgICAgICAgICAgICAgICAgICAgICAgIj4mbmJzcDsgVklJUlMgQWN0aXZlIGZpcmVzIDxicj4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICZuYnNwOyBmb3IgZmlyZXNlYXNvbiAyMDE0LgogICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgICAgIAogICAgCiAgICA8ZGl2IGNsYXNzPSJmb2xpdW0tbWFwIiBpZD0ibWFwXzdhZWVlNGFlMjFjNTQxYTU4MGE5NTk0NmZhNmI0ZWU4IiA+PC9kaXY+CjwvYm9keT4KPHNjcmlwdD4gICAgCiAgICAKICAgIAogICAgICAgIHZhciBib3VuZHMgPSBudWxsOwogICAgCgogICAgdmFyIG1hcF83YWVlZTRhZTIxYzU0MWE1ODBhOTU5NDZmYTZiNGVlOCA9IEwubWFwKAogICAgICAgICdtYXBfN2FlZWU0YWUyMWM1NDFhNTgwYTk1OTQ2ZmE2YjRlZTgnLCB7CiAgICAgICAgY2VudGVyOiBbNDUuMjMsIDE4XSwKICAgICAgICB6b29tOiAxMSwKICAgICAgICBtYXhCb3VuZHM6IGJvdW5kcywKICAgICAgICBsYXllcnM6IFtdLAogICAgICAgIHdvcmxkQ29weUp1bXA6IGZhbHNlLAogICAgICAgIGNyczogTC5DUlMuRVBTRzM4NTcsCiAgICAgICAgem9vbUNvbnRyb2w6IHRydWUsCiAgICAgICAgfSk7CgogICAgCiAgICAKICAgIHZhciB0aWxlX2xheWVyX2FlYWNjYjQ2NmFmZTQ3NzViMjYyMWFiYjM0MjZiNGRiID0gTC50aWxlTGF5ZXIoCiAgICAgICAgJ2h0dHBzOi8ve3N9LnRpbGUub3BlbnN0cmVldG1hcC5vcmcve3p9L3t4fS97eX0ucG5nJywKICAgICAgICB7CiAgICAgICAgImF0dHJpYnV0aW9uIjogbnVsbCwKICAgICAgICAiZGV0ZWN0UmV0aW5hIjogZmFsc2UsCiAgICAgICAgIm1heE5hdGl2ZVpvb20iOiAxOCwKICAgICAgICAibWF4Wm9vbSI6IDE4LAogICAgICAgICJtaW5ab29tIjogMCwKICAgICAgICAibm9XcmFwIjogZmFsc2UsCiAgICAgICAgIm9wYWNpdHkiOiAxLAogICAgICAgICJzdWJkb21haW5zIjogImFiYyIsCiAgICAgICAgInRtcyI6IGZhbHNlCn0pLmFkZFRvKG1hcF83YWVlZTRhZTIxYzU0MWE1ODBhOTU5NDZmYTZiNGVlOCk7CiAgICAKICAgICAgICAgICAgdmFyIG1hY3JvX2VsZW1lbnRfYWE1MjcyNDBkNmY3NDZhYWI1OTgyNmQ0NmRiNTI2ZTIgPSBMLnRpbGVMYXllci53bXMoCiAgICAgICAgICAgICAgICAnaHR0cDovLzE3My44Mi45NC4xMDQ6ODA4MC9nZW9zZXJ2ZXIvSU9UL3dtcz8nLAogICAgICAgICAgICAgICAgewogICJhdHRyaWJ1dGlvbiI6ICIiLAogICJmb3JtYXQiOiAiaW1hZ2UvcG5nIiwKICAibGF5ZXJzIjogIklPVDpmaXJlX2hlYXRtYXAiLAogICJzdHlsZXMiOiAiIiwKICAidHJhbnNwYXJlbnQiOiB0cnVlLAogICJ2ZXJzaW9uIjogIjEuMS4xIgp9CiAgICAgICAgICAgICAgICApLmFkZFRvKG1hcF83YWVlZTRhZTIxYzU0MWE1ODBhOTU5NDZmYTZiNGVlOCk7CgogICAgICAgIAogICAgCiAgICAgICAgICAgIHZhciBtYWNyb19lbGVtZW50Xzc5NjIzMzU0MjJjOTQ2ZDY5MDc4YTMwYjQ0YWI4NTJmID0gTC50aWxlTGF5ZXIud21zKAogICAgICAgICAgICAgICAgJ2h0dHA6Ly8xNzMuODIuOTQuMTA0OjgwODAvZ2Vvc2VydmVyL0lPVC93bXM/JywKICAgICAgICAgICAgICAgIHsKICAiYXR0cmlidXRpb24iOiAiIiwKICAiZm9ybWF0IjogImltYWdlL3BuZyIsCiAgImxheWVycyI6ICJJT1Q6T3Bhc25vc3Rfb2RfcG96YXJhIiwKICAic3R5bGVzIjogIiIsCiAgInRyYW5zcGFyZW50IjogdHJ1ZSwKICAidmVyc2lvbiI6ICIxLjEuMSIKfQogICAgICAgICAgICAgICAgKS5hZGRUbyhtYXBfN2FlZWU0YWUyMWM1NDFhNTgwYTk1OTQ2ZmE2YjRlZTgpOwoKICAgICAgICAKICAgIAogICAgICAgICAgICB2YXIgbWFjcm9fZWxlbWVudF83MjI3YWY4OGRiYzM0Y2RmOTkyYjdmZTI4OWRhYTExMiA9IEwudGlsZUxheWVyLndtcygKICAgICAgICAgICAgICAgICdodHRwOi8vMTczLjgyLjk0LjEwNDo4MDgwL2dlb3NlcnZlci9JT1Qvd21zPycsCiAgICAgICAgICAgICAgICB7CiAgImF0dHJpYnV0aW9uIjogIiIsCiAgImZvcm1hdCI6ICJpbWFnZS9wbmciLAogICJsYXllcnMiOiAiSU9UOmZpcmVfYXJjaGl2ZSIsCiAgInN0eWxlcyI6ICIiLAogICJ0cmFuc3BhcmVudCI6IHRydWUsCiAgInZlcnNpb24iOiAiMS4xLjEiCn0KICAgICAgICAgICAgICAgICkuYWRkVG8obWFwXzdhZWVlNGFlMjFjNTQxYTU4MGE5NTk0NmZhNmI0ZWU4KTsKCiAgICAgICAgCiAgICAKICAgICAgICAgICAgdmFyIGxheWVyX2NvbnRyb2xfNzA4ZjNhOTM0N2MzNDQwZGI3Mjc0N2YxYmM3YzJhYTggPSB7CiAgICAgICAgICAgICAgICBiYXNlX2xheWVycyA6IHsgIm9wZW5zdHJlZXRtYXAiIDogdGlsZV9sYXllcl9hZWFjY2I0NjZhZmU0Nzc1YjI2MjFhYmIzNDI2YjRkYiwgfSwKICAgICAgICAgICAgICAgIG92ZXJsYXlzIDogeyAiVklJUlMgQWN0aXZlIGZpcmVzIiA6IG1hY3JvX2VsZW1lbnRfYWE1MjcyNDBkNmY3NDZhYWI1OTgyNmQ0NmRiNTI2ZTIsIkZpcmUgaGF6YXJkIiA6IG1hY3JvX2VsZW1lbnRfNzk2MjMzNTQyMmM5NDZkNjkwNzhhMzBiNDRhYjg1MmYsIlZJSVJTIEFjdGl2ZSBmaXJlcy8yMDE0IiA6IG1hY3JvX2VsZW1lbnRfNzIyN2FmODhkYmMzNGNkZjk5MmI3ZmUyODlkYWExMTIsIH0KICAgICAgICAgICAgICAgIH07CiAgICAgICAgICAgIEwuY29udHJvbC5sYXllcnMoCiAgICAgICAgICAgICAgICBsYXllcl9jb250cm9sXzcwOGYzYTkzNDdjMzQ0MGRiNzI3NDdmMWJjN2MyYWE4LmJhc2VfbGF5ZXJzLAogICAgICAgICAgICAgICAgbGF5ZXJfY29udHJvbF83MDhmM2E5MzQ3YzM0NDBkYjcyNzQ3ZjFiYzdjMmFhOC5vdmVybGF5cywKICAgICAgICAgICAgICAgIHtwb3NpdGlvbjogJ2JvdHRvbXJpZ2h0JywKICAgICAgICAgICAgICAgICBjb2xsYXBzZWQ6IGZhbHNlLAogICAgICAgICAgICAgICAgIGF1dG9aSW5kZXg6IHRydWUKICAgICAgICAgICAgICAgIH0pLmFkZFRvKG1hcF83YWVlZTRhZTIxYzU0MWE1ODBhOTU5NDZmYTZiNGVlOCk7CiAgICAgICAgICAgIAogICAgICAgIAo8L3NjcmlwdD4=" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen webkitallowfullscreen mozallowfullscreen></iframe></div></div>
+
+
+
+We can use this dataset we are using remote sensing data for analysis of potential fire hotspots and further refine the positioning of sensors.
+As we can see from this dataset our sample location is not very representative in this case. But this provides us with historical data that can guide us in our mission and help us determine most hazardus locations and areas that are in need of monitoring.
+
+MODIS Active fires
+
+The MODIS sensor, on board the TERRA and ACQUA satellites, identifies areas on the ground that are distinctly hotter than their surroundings and flags them as active fires. The difference in temperature between the areas that are actively burning with respect to neighbouring areas allows active fires to be identified and mapped. The spatial resolution of the active fire detection pixel from MODIS is 1 km.
+Additional information on the MODIS active fire product is available at https://earthdata.nasa.gov/what-is-new-collection-6-modis-active-fire-data
+
+VIIRS Active fires
+
+The VIIRS (Visible Infrared Imaging Radiomer Suite) on board the NASA/NOAA Suomi National Polar-orbiting Partnership (SNPP) uses similar algorithms to those used by MODIS to detect active fires. The VIIRS active fire products complements the MODIS active fire detection and provides an improved spatial resolution, as compared to MODIS. The spatial resolution of the active fire detection pixel for VIIRS is 375 m. Additionally, VIIRS is able to detect smaller fires and can help delinate perimeters of ongoing large fires.
+Additional information on VIIRS active fire products can be found at https://earthdata.nasa.gov/earth-observation-data/near-real-time/firms/viirs-i-band-active-fire-data
+
+The mapping of active fires is performed to provide a synoptic view of current fires in Europe and as a means to help the subsequent mapping of burnt fire perimeters. Information on active fires is normally updated 6 times daily and made available in EFFIS within 2-3 hours of the acquisition of the MODIS/VIIRS images.
+
+When interpreting the hotspots displayed in the map, the following must be considered:
+
+    Hotspot location on the map is only accurate within the spatial accuracy of the sensor
+    Some fires may be small or obscured by smoke or cloud and remain undetected
+    The satellites also detect other heat sources (not all hotspots are fires)
+
+To minimize false alarms and filter out active fires not qualified as wildfires (e.g. agricultural burnings), the system only displays a filtered subset of the hotspots detected by FIRMS. To this end a knowledge based algorithm is applied that takes into account the extent of surrounding land cover categories, the distance to urban areas and artificial surfaces, the confidence level of the hotspot.
+
+With the identify feature tool, key information attached to each active fire is provided, such as geographic coordinates, administrative district (commune and province) and the main land cover category affected.
+
+> source:
+    http://effis.jrc.ec.europa.eu/about-effis/technical-background/active-fire-detection/
+    
+
+
+
+```python
+
+```
+
+forecast:
+    https://www.ecmwf.int/en/forecasts/datasets
+
+
+```python
+import folium
+
+m = folium.Map(location=[45.23, 18], zoom_start=13, tiles='Openstreetmap')
+
+
+
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:Opasnost_od_pozara',
+    name='Fire hazard',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m)
+legend_html =   '''
+                <div style="position: fixed; 
+                            bottom: 50px; left: 50px; width: 100px; height: 150px; 
+                            background: white;
+                            border:2px solid black; z-index:9999; font-size:14px;
+                            ">&nbsp; Fire hazard<br>
+                            &nbsp; <img src="http://173.82.94.104:8080/geoserver/IOT/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=20&HEIGHT=20&LAYER=IOT:Opasnost_od_pozara">
+                              
+                </div>
+                ''' 
+
+m.get_root().html.add_child(folium.Element(legend_html))
+
+folium.LayerControl(position="bottomright",collapsed=False).add_to(m)
+```
+
+
+
+
+    <folium.map.LayerControl at 0x2acbd09da20>
+
+
+
+
+```python
+m1 = folium.Map(location=[45.23, 18], zoom_start=13, tiles='Openstreetmap')
+
+
+
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:Opasnost_od_pozara',
+    name='Fire hazard',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m1)
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:Sensori',
+    name='Sensor location',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m1)
+legend_html =   '''
+                <div style="position: fixed; 
+                            bottom: 50px; left: 50px; width: 150px; height: 50px; 
+                            background: white;
+                            border:2px solid black; z-index:9999; font-size:14px;
+                            ">&nbsp; Sensor locations <br>
+                             &nbsp; &nbsp;Sensors <i class="fa fa-circle" style="color:black"></i>
+                              
+                </div>
+                ''' 
+
+m1.get_root().html.add_child(folium.Element(legend_html))
+
+folium.LayerControl(position="bottomright",collapsed=False).add_to(m1)
+```
+
+
+
+
+    <folium.map.LayerControl at 0x2acbad42cf8>
+
+
+
+
+```python
+m2 = folium.Map(location=[45.23, 18], zoom_start=13, tiles='Openstreetmap')
+
+
+
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:Opasnost_od_pozara',
+    name='Fire danger',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m2)
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:vjetar_lipanj',
+    name='Wind direction June/2014',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m2)
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:vjetar_srpanj',
+    name='Wind direction July/2014',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m2)
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:vjetar_kolovoz',
+    name='Wind direction August/2014',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m2)
+legend_html =   '''
+                <div style="position: fixed; 
+                            bottom: 50px; left: 50px; width: 130px; height: 65px; 
+                            background: white;
+                            border:2px solid black; z-index:9999; font-size:14px;
+                            ">&nbsp; Wind direction <br>
+                            &nbsp;&nbsp;<img src="http://173.82.94.104:8080/geoserver/IOT/wms?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=60&HEIGHT=40&LAYER=IOT:vjetar_kolovoz">
+                              
+                </div>
+                ''' 
+
+m2.get_root().html.add_child(folium.Element(legend_html))
+
+folium.LayerControl(position="bottomright",collapsed=False).add_to(m2)
+```
+
+
+
+
+    <folium.map.LayerControl at 0x2acbdb655c0>
+
+
+
+
+```python
+import folium
+
+m3 = folium.Map(location=[45.23, 18], zoom_start=11, tiles='Openstreetmap')
+
+
+
+
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:fire_heatmap',
+    name='VIIRS Active fires',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m3)
+
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:Opasnost_od_pozara',
+    name='Fire hazard',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m3)
+
+folium.raster_layers.WmsTileLayer(
+    url='http://173.82.94.104:8080/geoserver/IOT/wms?',
+    layers='IOT:fire_archive',
+    name='VIIRS Active fires/2014',
+    fmt='image/png',
+    overlay=True,
+    control=True,
+    transparent=True,
+).add_to(m3)
+
+
+legend_html =   '''
+                <div style="position: fixed; 
+                            bottom: 50px; left: 50px; width: 150px; height: 55px; 
+                            background: white;
+                            border:2px solid black; z-index:9999; font-size:14px;
+                            ">&nbsp; VIIRS Active fires <br>
+                            &nbsp; for fireseason 2014.
+                           
+                              
+                </div>
+                ''' 
+
+m3.get_root().html.add_child(folium.Element(legend_html))
+
+folium.LayerControl(position="bottomright",collapsed=False).add_to(m3)
+```
+
+
+
+
+    <folium.map.LayerControl at 0x2acbdb659b0>
+
+
+
+
+```python
+
+```
+
+
+```python
+
+```
